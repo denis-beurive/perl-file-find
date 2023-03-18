@@ -37,11 +37,6 @@ sub ls {
     })
 }
 
-sub always_true {
-    my ($in_path) = @_;
-    return(1);
-}
-
 # List the content of a directory, recursively.
 # @param $in_path The path of the directory to list.
 # @param %options:
@@ -73,7 +68,7 @@ sub find {
     my @s_stack = ();
     my %files = ();
     my $filter_file = exists($options{'file_filter'}) ? $options{'file_filter'} : undef;
-    my $filter_directory = exists($options{'directory_filter'}) ? $options{'directory_filter'} : \&always_true;
+    my $filter_directory = exists($options{'directory_filter'}) ? $options{'directory_filter'} : sub {return 1};
 
     $in_path = rel2abs($in_path);
     push(@s_stack, $in_path);
@@ -81,7 +76,6 @@ sub find {
     while(int(@s_stack) > 0) {
         my $current_dir = pop(@s_stack);
         my $entries = ls($current_dir);
-
 
         if ($filter_directory->($current_dir)) {
             my @current_dir_files = @{$entries->{&K_FILES}};
@@ -111,4 +105,4 @@ sub my_directory_filter { return ! (shift =~ m/examples$/); }
 
 # Select all files under the directory "../src".
 my $files = find('../src', 'file_filter' => \&my_file_filter, 'directory_filter' => \&my_directory_filter);
-printf Dumper $files;
+print Dumper $files;
